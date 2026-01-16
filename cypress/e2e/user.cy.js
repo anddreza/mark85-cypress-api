@@ -1,28 +1,27 @@
 describe('POST /users', () => {
-    it('register a new user', () => {
 
-        const user = {
-            name: 'Andreza',
-            email: 'andreza@gmail.com',
-            password: '123456'
-        }
+      beforeEach(function (){
+        cy.fixture('users').then(function(users){
+            this.users = users //construtor na programação normal, to criando um contexto
+        })
+    })
+    
 
-        cy.task('deleteUser', user.email)
+    it('register a new user', function () {
+        const user = this.users.create
+
+        cy.task('removeUser', user.email)
         cy.postUser(user)
             .then((response) => {
-                expect(response.status).to.eq(200)
+                expect(response.status).to.eq(201)
             })
     })
 
-    it('duplicate email', () => {
+    it('duplicate email', function () {
 
-        const user = {
-            name: 'James Gunn',
-            email: 'james@hotmail.com',
-            password: '123456'
-        }
+        const user = this.users.dup_email
 
-        cy.task('deleteUser', user.email)
+        cy.task('removeUser', user.email)
         cy.postUser(user)
         cy.postUser(user)
             .then((response) => {
@@ -32,18 +31,14 @@ describe('POST /users', () => {
             })
     })
 
-    context('required fields', ()=>{
+    context('required fields', function (){
         let user;
 
-        beforeEach(()=>{
-                user = {
-                name: 'Margot Robbie', 
-                email: 'margot@gmail.com',
-                password: 'pwd123'
-            }
+        beforeEach(function (){
+                user = this.users.required
         })
 
-        it('name is required', ()=>{
+        it('name is required', function (){
             delete user.name
             cy.postUser(user)
                 .then((response)=>{
@@ -53,7 +48,7 @@ describe('POST /users', () => {
                 })
         })
 
-         it('email is required', ()=>{
+         it('email is required', function (){
             delete user.email
             cy.postUser(user)
                 .then((response)=>{
@@ -63,7 +58,7 @@ describe('POST /users', () => {
                 })
         })
 
-        it('password is required', ()=>{
+        it('password is required', function (){
             delete user.password
             cy.postUser(user)
                 .then((response)=>{
